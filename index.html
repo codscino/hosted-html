@@ -114,6 +114,46 @@
             cursor: pointer;
         }
 
+        /* TOGGLE BUTTONS FOR ATECO */
+        .ateco-toggle {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            margin-bottom: 16px;
+        }
+
+        .ateco-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            color: var(--text);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .ateco-btn:hover {
+            border-color: var(--primary);
+            background: #fff5f7;
+        }
+
+        .ateco-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .ateco-description {
+            font-size: 0.75rem;
+            color: #666;
+            margin-top: 4px;
+            line-height: 1.3;
+        }
+
         /* INFO BUTTON E TOOLTIP */
         .info-btn {
             display: inline-flex;
@@ -347,6 +387,27 @@
             <div class="slider-group">
                 <div class="slider-header">
                     <span class="slider-label">
+                        Categoria ATECO (Forfettario)
+                        <span class="info-btn">i
+                            <span class="tooltip">Scegli il codice ATECO che corrisponde alla tua attività di locazione. Determina il coefficiente di reddito lordo soggetto a tassazione.</span>
+                        </span>
+                    </span>
+                </div>
+                <div class="ateco-toggle">
+                    <button class="ateco-btn active" data-ateco="50" onclick="changeAteco(50, this)">
+                        <div><strong>50%</strong></div>
+                        <div class="ateco-description">68.20.01<br>Affitto beni propri</div>
+                    </button>
+                    <button class="ateco-btn" data-ateco="40" onclick="changeAteco(40, this)">
+                        <div><strong>40%</strong></div>
+                        <div class="ateco-description">55.20.51<br>Affittacamere</div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="slider-group">
+                <div class="slider-header">
+                    <span class="slider-label">
                         Commercialista (in Cedolare)
                         <span class="info-btn">i
                             <span class="tooltip">Onorario medio annuo per la dichiarazione dei redditi (Quadro RB/RL) in regime di Cedolare Secca senza apertura Partita IVA.</span>
@@ -412,7 +473,7 @@
                     <div class="box-title">
                         Forfettario (5%)
                         <span class="info-btn">i
-                            <span class="tooltip">Tassazione agevolata Startup (primi 5 anni). Viene tassato solo il 50% del fatturato lordo (ATECO 68.20.01). L'aliquota effettiva sul totale è del solo 2.5% (5% del 50%[...]
+                            <span class="tooltip">Tassazione agevolata Startup (primi 5 anni). Coefficiente ATECO selezionato. L'aliquota effettiva è calcolata sul reddito imponibile.
                         </span>
                     </div>
                     <div class="box-net" id="nettoForfettario">€ 0</div>
@@ -470,7 +531,7 @@
                             <span class="td-label">
                                 Imposte / Tasse
                                 <span class="info-btn">i
-                                    <span class="tooltip"><b>Cedolare:</b> 21% calcolato sul 100% del fatturato.<br><b>Forfettario:</b> 5% calcolato solo sul 50% del fatturato (ATECO 68.20.01, pari ad appena il 2.5% ef[...]
+                                    <span class="tooltip"><b>Cedolare:</b> 21% calcolato sul 100% del fatturato.<br><b>Forfettario:</b> 5% calcolato sul coefficiente ATECO selezionato.
                                 </span>
                             </span>
                         </td>
@@ -528,9 +589,22 @@
     const INPS_FISSA_FISSA = 3000;
     const CDC_FISSO = 100;
     const IVA_RATE = 0.22; // 22% IVA sulle commissioni Airbnb
+    let atecoCoefficient = 0.50; // Default: 50% (ATECO 68.20.01)
 
     function fmt(num) {
         return '€ ' + Math.round(num).toLocaleString('it-IT');
+    }
+
+    function changeAteco(coefficient, button) {
+        // Update coefficient
+        atecoCoefficient = coefficient / 100;
+        
+        // Update button states
+        document.querySelectorAll('.ateco-btn').forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        
+        // Recalculate
+        calcola();
     }
 
     function calcola() {
@@ -555,8 +629,8 @@
         // 2. FORFETTARIO 5%
         const airbnbFor = lordo * commAirbnbPerc;
         const ivaFor = airbnbFor * IVA_RATE;
-        const imponibileFor = lordo * 0.50; // ATECO 68.20.01 (Coefficiente 50%)
-        const tasseFor = imponibileFor * 0.05; // 5% startup sul 50% del lordo
+        const imponibileFor = lordo * atecoCoefficient; // Dynamic ATECO coefficient
+        const tasseFor = imponibileFor * 0.05; // 5% startup
         
         // Calcolo eventuale eccedenza INPS sopra il minimale (~18.808 €)
         let inpsVariabile = 0;
@@ -606,9 +680,12 @@
 
         // Banner Strategico Finale
         const banner = document.getElementById('summaryBanner');
+        const atecoPercent = Math.round(atecoCoefficient * 100);
+        const effectiveTaxRate = (atecoPercent * 0.05).toFixed(2);
+        
         if (nettoFor > nettoCed) {
             const scontoMax = ((nettoFor - nettoCed) / lordo) * 100;
-            banner.innerHTML = `Con il Forfettario guadagni <span class="highlight">${fmt(nettoFor - nettoCed)} in più</span> all'anno.<br>Puoi abbassare i prezzi fino al <span class="highlight">${scontoMax.toFixed(1)}%</span> e restare competitivo.`;
+            banner.innerHTML = `Con il Forfettario (ATECO ${atecoPercent}%) guadagni <span class="highlight">${fmt(nettoFor - nettoCed)} in più</span> all'anno.<br>Puoi abbassare i prezzi fino al <span class="highlight">${scontoMax.toFixed(1)}%</span> e restare competitivo.`;
         } else {
             const diffNeg = nettoCed - nettoFor;
             banner.innerHTML = `A questo livello di incasso la Cedolare ti conviene di <span class="highlight">${fmt(diffNeg)}</span>.<br>Aumenta lo slider del fatturato per vedere dove scatta il vantaggio Forfettario.`;
