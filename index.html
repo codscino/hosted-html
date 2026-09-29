@@ -370,7 +370,7 @@
                     <span>
                         INPS Fissa Ridotta (-35%):
                         <span class="info-btn">i
-                            <span class="tooltip">Contributi minimi obbligatori della Gestione Commercianti con sconto del 35%. Con almeno 5 anni di contributi versati, avrai diritto alla pensione di vecchiaia contributiva a 71 anni.</span>
+                            <span class="tooltip">Contributi minimi obbligatori della Gestione Commercianti con sconto del 35%. Con almeno 5 anni di contributi versati, avrai diritto alla pensione di vecchiaia.</span>
                         </span>
                     </span>
                     <strong>€ 3.000 / anno</strong>
@@ -449,9 +449,21 @@
                     <tr>
                         <td>
                             <span class="td-label">
+                                IVA su Commissioni Airbnb (22%)
+                                <span class="info-btn">i
+                                    <span class="tooltip">Imposta sul Valore Aggiunto calcolata sul 22% delle commissioni Airbnb. È una spesa aggiuntiva non deducibile in nessun regime.</span>
+                                </span>
+                            </span>
+                        </td>
+                        <td id="tdIvaCed">€ 0</td>
+                        <td id="tdIvaFor">€ 0</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="td-label">
                                 Imposte / Tasse
                                 <span class="info-btn">i
-                                    <span class="tooltip"><b>Cedolare:</b> 21% calcolato sul 100% del fatturato.<br><b>Forfettario:</b> 5% calcolato solo sul 40% del fatturato (pari ad appena il 2% effettivo del lordo).</span>
+                                    <span class="tooltip"><b>Cedolare:</b> 21% calcolato sul 100% del fatturato.<br><b>Forfettario:</b> 5% calcolato solo sul 40% del fatturato (pari ad appena il 2% effettivo).</span>
                                 </span>
                             </span>
                         </td>
@@ -463,7 +475,7 @@
                             <span class="td-label">
                                 INPS Commercianti
                                 <span class="info-btn">i
-                                    <span class="tooltip">Spesa previdenziale obbligatoria. Nel Forfettario include il minimale fisso con sconto 35% (€3.000) più eventuale quota variabile (15.91% effettivo) sulla parte di imponibile fiscale eccedente €18.808. In Cedolare è pari a €0.</span>
+                                    <span class="tooltip">Spesa previdenziale obbligatoria. Nel Forfettario include il minimale fisso con sconto 35% (€3.000) più eventuale quota variabile (15.91% su eccedenza).</span>
                                 </span>
                             </span>
                         </td>
@@ -508,6 +520,7 @@
     // VALORI FISSI
     const INPS_FISSA_FISSA = 3000;
     const CDC_FISSO = 100;
+    const IVA_RATE = 0.22; // 22% IVA sulle commissioni Airbnb
 
     function fmt(num) {
         return '€ ' + Math.round(num).toLocaleString('it-IT');
@@ -528,11 +541,13 @@
 
         // 1. CEDOLARE SECCA
         const airbnbCed = lordo * commAirbnbPerc;
+        const ivaCed = airbnbCed * IVA_RATE;
         const tasseCed = lordo * 0.21;
-        const nettoCed = lordo - airbnbCed - tasseCed - commCedolare;
+        const nettoCed = lordo - airbnbCed - ivaCed - tasseCed - commCedolare;
 
         // 2. FORFETTARIO 5%
         const airbnbFor = lordo * commAirbnbPerc;
+        const ivaFor = airbnbFor * IVA_RATE;
         const imponibileFor = lordo * 0.40; // Codice ATECO 55.20.51 (Coefficiente 40%)
         const tasseFor = imponibileFor * 0.05; // 5% startup sul 40% del lordo
         
@@ -545,7 +560,7 @@
         const inpsTotale = INPS_FISSA_FISSA + inpsVariabile;
         const costiGestioneFor = commPIva + CDC_FISSO;
 
-        const nettoFor = lordo - airbnbFor - tasseFor - inpsTotale - costiGestioneFor;
+        const nettoFor = lordo - airbnbFor - ivaFor - tasseFor - inpsTotale - costiGestioneFor;
 
         // Aggiornamento Box Grafici
         document.getElementById('nettoCedolare').innerText = fmt(nettoCed);
@@ -572,6 +587,8 @@
         document.getElementById('tdLordoFor').innerText = fmt(lordo);
         document.getElementById('tdAirCed').innerText = '-' + fmt(airbnbCed);
         document.getElementById('tdAirFor').innerText = '-' + fmt(airbnbFor);
+        document.getElementById('tdIvaCed').innerText = '-' + fmt(ivaCed);
+        document.getElementById('tdIvaFor').innerText = '-' + fmt(ivaFor);
         document.getElementById('tdTasseCed').innerText = '-' + fmt(tasseCed);
         document.getElementById('tdTasseFor').innerText = '-' + fmt(tasseFor);
         document.getElementById('tdInpsFor').innerText = '-' + fmt(inpsTotale);
@@ -584,7 +601,7 @@
         const banner = document.getElementById('summaryBanner');
         if (nettoFor > nettoCed) {
             const scontoMax = ((nettoFor - nettoCed) / lordo) * 100;
-            banner.innerHTML = `Con il Forfettario guadagni <span class="highlight">${fmt(nettoFor - nettoCed)} in più</span> all'anno.<br>Puoi abbassare i prezzi fino al <span class="highlight">${scontoMax.toFixed(1)}%</span> rimanendo più competitivo dei rivali in Cedolare.`;
+            banner.innerHTML = `Con il Forfettario guadagni <span class="highlight">${fmt(nettoFor - nettoCed)} in più</span> all'anno.<br>Puoi abbassare i prezzi fino al <span class="highlight">${scontoMax.toFixed(1)}%</span> e stare alla pari con la Cedolare.`;
         } else {
             const diffNeg = nettoCed - nettoFor;
             banner.innerHTML = `A questo livello di incasso la Cedolare ti conviene di <span class="highlight">${fmt(diffNeg)}</span>.<br>Aumenta lo slider del fatturato per vedere dove scatta il vantaggio del Forfettario.`;
