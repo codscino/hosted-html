@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparatore Airbnb: Cedolare vs Forfettario 5%</title>
+    <style>
+        :root {
+            --primary: #ff385c;
+            --primary-hover: #e00b41;
+            --bg: #f7f7f7;
+            --card-bg: #ffffff;
+            --text: #222222;
+            --border: #dddddd;
+            --success: #008a05;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 24px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        header {
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        p.subtitle {
+            color: #717171;
+            font-size: 0.95rem;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 850px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .slider-group {
+            margin-bottom: 20px;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .slider-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .slider-value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e0e0e0;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        /* INFO BUTTON E TOOLTIP */
+        .info-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 17px;
+            height: 17px;
+            border-radius: 50%;
+            background: #e4e6eb;
+            color: #4b4f56;
+            font-size: 11px;
+            font-weight: bold;
+            font-style: italic;
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .info-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .info-btn .tooltip {
+            visibility: hidden;
+            opacity: 0;
+            width: 260px;
+            background-color: #1e293b;
+            color: #f8fafc;
+            text-align: left;
+            border-radius: 8px;
+            padding: 10px 12px;
+            position: absolute;
+            z-index: 100;
+            bottom: 130%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.78rem;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 1.4;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+            transition: opacity 0.25s ease, visibility 0.25s ease;
+            pointer-events: none;
+        }
+
+        .info-btn .tooltip::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #1e293b transparent transparent transparent;
+        }
+
+        .info-btn:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .fixed-parameters {
+            background: #f8f9fa;
+            border: 1px dashed var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            margin-top: 10px;
+        }
+
+        .fixed-param-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .fixed-param-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+            color: #444;
+        }
+
+        .fixed-param-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .results-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .result-box {
+            padding: 16px;
+            border-radius: 12px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            text-align: center;
+        }
+
+        .result-box.winner {
+            background: #e6f4ea;
+            border-color: #b7e1cd;
+        }
+
+        .box-title {
+            font-size: 0.85rem;
+            color: #555;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .box-net {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        .result-box.winner .box-net {
+            color: var(--success);
+        }
+
+        .badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background: var(--success);
+            color: white;
+            margin-top: 4px;
+        }
+
+        table.detail-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            margin-top: 12px;
+        }
+
+        table.detail-table th, table.detail-table td {
+            padding: 8px 4px;
+            text-align: right;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        table.detail-table th:first-child, table.detail-table td:first-child {
+            text-align: left;
+        }
+
+        .th-label, .td-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .summary-banner {
+            background: #333;
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            margin-top: 16px;
+            text-align: center;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .highlight {
+            color: #ffb400;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Comparatore Airbnb: Cedolare vs Forfettario</h1>
+        <p class="subtitle">Calcolo reale con imposte, INPS, commissioni Airbnb e spese di gestione</p>
+    </header>
+
+    <div class="main-grid">
+        <!-- CONTROLLI E SLIDERS -->
+        <div class="card">
+            <div class="card-title">Parametri Variabili</div>
+
+            <div class="slider-group">
+                <div class="slider-header">
+                    <span class="slider-label">
+                        Fatturato Lordo Annuo
+                        <span class="info-btn">i
+                            <span class="tooltip">Totale incassato dalle prenotazioni Airbnb prima di qualsiasi trattenuta o commissione della piattaforma.</span>
+                        </span>
+                    </span>
+                    <span class="slider-value" id="valFatturato">€ 45.000</span>
+                </div>
+                <input type="range" id="sliderFatturato" min="10000" max="85000" step="1000" value="45000" oninput="calcola()">
+            </div>
+
+            <div class="slider-group">
+                <div class="slider-header">
+                    <span class="slider-label">
+                        Commissioni Airbnb
+                        <span class="info-btn">i
+                            <span class="tooltip">Quota trattenuta da Airbnb (di norma 15% o 15.5% per host che optano per il modello di commissione solo host). Non è deducibile nella Cedolare, né nel Forfettario.</span>
+                        </span>
+                    </span>
+                    <span class="slider-value" id="valCommissione">15,5%</span>
+                </div>
+                <input type="range" id="sliderCommissione" min="0" max="20" step="0.5" value="15.5" oninput="calcola()">
+            </div>
+
+            <div class="slider-group">
+                <div class="slider-header">
+                    <span class="slider-label">
+                        Commercialista (in Cedolare)
+                        <span class="info-btn">i
+                            <span class="tooltip">Onorario medio annuo per la dichiarazione dei redditi (Quadro RB/RL) in regime di Cedolare Secca senza apertura Partita IVA.</span>
+                        </span>
+                    </span>
+                    <span class="slider-value" id="valCommCedolare">€ 300</span>
+                </div>
+                <input type="range" id="sliderCommCedolare" min="0" max="1000" step="50" value="300" oninput="calcola()">
+            </div>
+
+            <div class="slider-group">
+                <div class="slider-header">
+                    <span class="slider-label">
+                        Commercialista / Gestione P.IVA
+                        <span class="info-btn">i
+                            <span class="tooltip">Onorario per tenuta contabilità forfettaria, invio fatture elettroniche, adempimenti INPS, Camera di Commercio e modello REDDITI.</span>
+                        </span>
+                    </span>
+                    <span class="slider-value" id="valCommPIva">€ 800</span>
+                </div>
+                <input type="range" id="sliderCommPIva" min="300" max="2500" step="50" value="800" oninput="calcola()">
+            </div>
+
+            <!-- COSTI FISSI BLOCCATI -->
+            <div class="fixed-parameters">
+                <div class="fixed-param-title">Costi Fissi Forfettario (Bloccati)</div>
+                <div class="fixed-param-item">
+                    <span>
+                        INPS Fissa Ridotta (-35%):
+                        <span class="info-btn">i
+                            <span class="tooltip">Contributi minimi obbligatori della Gestione Commercianti con sconto del 35%. Con almeno 5 anni di contributi versati, avrai diritto alla pensione di vecchiaia contributiva a 71 anni.</span>
+                        </span>
+                    </span>
+                    <strong>€ 3.000 / anno</strong>
+                </div>
+                <div class="fixed-param-item">
+                    <span>
+                        Diritti Cam. Commercio / Bolli:
+                        <span class="info-btn">i
+                            <span class="tooltip">Diritto annuale di iscrizione al Registro Imprese (Camera di Commercio) + diritti di segreteria e bolli per Partita IVA commerciale.</span>
+                        </span>
+                    </span>
+                    <strong>€ 100 / anno</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- RISULTATI E DETTAGLI -->
+        <div class="card">
+            <div class="card-title">Confronto Netto Reale</div>
+
+            <div class="results-comparison">
+                <div class="result-box" id="boxCedolare">
+                    <div class="box-title">
+                        Cedolare Secca (21%)
+                        <span class="info-btn">i
+                            <span class="tooltip">Imposta sostitutiva calcolata sul 100% del Fatturato Lordo incassato. Nessuna deduzione di spese/commissioni consentita.</span>
+                        </span>
+                    </div>
+                    <div class="box-net" id="nettoCedolare">€ 0</div>
+                </div>
+                <div class="result-box" id="boxForfettario">
+                    <div class="box-title">
+                        Forfettario (5%)
+                        <span class="info-btn">i
+                            <span class="tooltip">Tassazione agevolata Startup (primi 5 anni). Viene tassato solo il 40% del fatturato lordo. L'aliquota effettiva sul totale è del solo 2% (5% del 40%).</span>
+                        </span>
+                    </div>
+                    <div class="box-net" id="nettoForfettario">€ 0</div>
+                    <div class="badge" id="badgeVantaggio" style="display:none;">+€ 0 / anno</div>
+                </div>
+            </div>
+
+            <table class="detail-table">
+                <thead>
+                    <tr>
+                        <th>Voce</th>
+                        <th>Cedolare</th>
+                        <th>Forfettario 5%</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <span class="td-label">
+                                Fatturato Lordo
+                                <span class="info-btn">i
+                                    <span class="tooltip">Importo complessivo incassato dalle prenotazioni prima di costi e provvigioni.</span>
+                                </span>
+                            </span>
+                        </td>
+                        <td id="tdLordoCed">€ 0</td>
+                        <td id="tdLordoFor">€ 0</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="td-label">
+                                Commissioni Airbnb
+                                <span class="info-btn">i
+                                    <span class="tooltip">Quota del fatturato trattenuta direttamente da Airbnb.</span>
+                                </span>
+                            </span>
+                        </td>
+                        <td id="tdAirCed">€ 0</td>
+                        <td id="tdAirFor">€ 0</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="td-label">
+                                Imposte / Tasse
+                                <span class="info-btn">i
+                                    <span class="tooltip"><b>Cedolare:</b> 21% calcolato sul 100% del fatturato.<br><b>Forfettario:</b> 5% calcolato solo sul 40% del fatturato (pari ad appena il 2% effettivo del lordo).</span>
+                                </span>
+                            </span>
+                        </td>
+                        <td id="tdTasseCed">€ 0</td>
+                        <td id="tdTasseFor">€ 0</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="td-label">
+                                INPS Commercianti
+                                <span class="info-btn">i
+                                    <span class="tooltip">Spesa previdenziale obbligatoria. Nel Forfettario include il minimale fisso con sconto 35% (€3.000) più eventuale quota variabile (15.91% effettivo) sulla parte di imponibile fiscale eccedente €18.808. In Cedolare è pari a €0.</span>
+                                </span>
+                            </span>
+                        </td>
+                        <td>€ 0</td>
+                        <td id="tdInpsFor">€ 0</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="td-label">
+                                Commercialista + C.d.C.
+                                <span class="info-btn">i
+                                    <span class="tooltip">Spese amministrative annue complessive di gestione fiscale, contabilità e iscrizione Camera di Commercio.</span>
+                                </span>
+                            </span>
+                        </td>
+                        <td id="tdCommCed">€ 0</td>
+                        <td id="tdCommFor">€ 0</td>
+                    </tr>
+                    <tr style="font-weight:700; background:#f9f9f9;">
+                        <td>
+                            <span class="td-label">
+                                Netto In Tasca
+                                <span class="info-btn">i
+                                    <span class="tooltip">Guadagno netto reale annuo che rimane in tasca dopo aver saldato Airbnb, tasse, contributi pensione e commercialista.</span>
+                                </span>
+                            </span>
+                        </td>
+                        <td id="tdNettoCed">€ 0</td>
+                        <td id="tdNettoFor">€ 0</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="summary-banner" id="summaryBanner">
+                Calcolo in corso...
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // VALORI FISSI
+    const INPS_FISSA_FISSA = 3000;
+    const CDC_FISSO = 100;
+
+    function fmt(num) {
+        return '€ ' + Math.round(num).toLocaleString('it-IT');
+    }
+
+    function calcola() {
+        // Lettura Valori dagli Slider Variabili
+        const lordo = parseFloat(document.getElementById('sliderFatturato').value);
+        const commAirbnbPerc = parseFloat(document.getElementById('sliderCommissione').value) / 100;
+        const commCedolare = parseFloat(document.getElementById('sliderCommCedolare').value);
+        const commPIva = parseFloat(document.getElementById('sliderCommPIva').value);
+
+        // Aggiornamento Etichette Slider
+        document.getElementById('valFatturato').innerText = fmt(lordo);
+        document.getElementById('valCommissione').innerText = (commAirbnbPerc * 100).toFixed(1) + '%';
+        document.getElementById('valCommCedolare').innerText = fmt(commCedolare);
+        document.getElementById('valCommPIva').innerText = fmt(commPIva);
+
+        // 1. CEDOLARE SECCA
+        const airbnbCed = lordo * commAirbnbPerc;
+        const tasseCed = lordo * 0.21;
+        const nettoCed = lordo - airbnbCed - tasseCed - commCedolare;
+
+        // 2. FORFETTARIO 5%
+        const airbnbFor = lordo * commAirbnbPerc;
+        const imponibileFor = lordo * 0.40; // Codice ATECO 55.20.51 (Coefficiente 40%)
+        const tasseFor = imponibileFor * 0.05; // 5% startup sul 40% del lordo
+        
+        // Calcolo eventuale eccedenza INPS sopra il minimale (~18.808 €)
+        let inpsVariabile = 0;
+        const minimaleInps = 18808;
+        if (imponibileFor > minimaleInps) {
+            inpsVariabile = (imponibileFor - minimaleInps) * (0.2448 * 0.65); // 24,48% con riduzione 35%
+        }
+        const inpsTotale = INPS_FISSA_FISSA + inpsVariabile;
+        const costiGestioneFor = commPIva + CDC_FISSO;
+
+        const nettoFor = lordo - airbnbFor - tasseFor - inpsTotale - costiGestioneFor;
+
+        // Aggiornamento Box Grafici
+        document.getElementById('nettoCedolare').innerText = fmt(nettoCed);
+        document.getElementById('nettoForfettario').innerText = fmt(nettoFor);
+
+        const boxCed = document.getElementById('boxCedolare');
+        const boxFor = document.getElementById('boxForfettario');
+        const badge = document.getElementById('badgeVantaggio');
+
+        if (nettoFor > nettoCed) {
+            boxFor.classList.add('winner');
+            boxCed.classList.remove('winner');
+            const diff = nettoFor - nettoCed;
+            badge.innerText = '+' + fmt(diff) + ' / anno';
+            badge.style.display = 'inline-block';
+        } else {
+            boxCed.classList.add('winner');
+            boxFor.classList.remove('winner');
+            badge.style.display = 'none';
+        }
+
+        // Aggiornamento Tabella Dettaglio
+        document.getElementById('tdLordoCed').innerText = fmt(lordo);
+        document.getElementById('tdLordoFor').innerText = fmt(lordo);
+        document.getElementById('tdAirCed').innerText = '-' + fmt(airbnbCed);
+        document.getElementById('tdAirFor').innerText = '-' + fmt(airbnbFor);
+        document.getElementById('tdTasseCed').innerText = '-' + fmt(tasseCed);
+        document.getElementById('tdTasseFor').innerText = '-' + fmt(tasseFor);
+        document.getElementById('tdInpsFor').innerText = '-' + fmt(inpsTotale);
+        document.getElementById('tdCommCed').innerText = '-' + fmt(commCedolare);
+        document.getElementById('tdCommFor').innerText = '-' + fmt(costiGestioneFor);
+        document.getElementById('tdNettoCed').innerText = fmt(nettoCed);
+        document.getElementById('tdNettoFor').innerText = fmt(nettoFor);
+
+        // Banner Strategico Finale
+        const banner = document.getElementById('summaryBanner');
+        if (nettoFor > nettoCed) {
+            const scontoMax = ((nettoFor - nettoCed) / lordo) * 100;
+            banner.innerHTML = `Con il Forfettario guadagni <span class="highlight">${fmt(nettoFor - nettoCed)} in più</span> all'anno.<br>Puoi abbassare i prezzi fino al <span class="highlight">${scontoMax.toFixed(1)}%</span> rimanendo più competitivo dei rivali in Cedolare.`;
+        } else {
+            const diffNeg = nettoCed - nettoFor;
+            banner.innerHTML = `A questo livello di incasso la Cedolare ti conviene di <span class="highlight">${fmt(diffNeg)}</span>.<br>Aumenta lo slider del fatturato per vedere dove scatta il vantaggio del Forfettario.`;
+        }
+    }
+
+    // Inizializza al caricamento
+    calcola();
+</script>
+
+</body>
+</html>
