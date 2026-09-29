@@ -172,9 +172,16 @@
             border-color: #1e293b transparent transparent transparent;
         }
 
-        .info-btn:hover .tooltip {
+        .info-btn:hover .tooltip,
+        .info-btn.active .tooltip {
             visibility: visible;
             opacity: 1;
+        }
+
+        .info-btn:hover,
+        .info-btn.active {
+            background: var(--primary);
+            color: white;
         }
 
         .fixed-parameters {
@@ -329,7 +336,7 @@
                     <span class="slider-label">
                         Commissioni Airbnb
                         <span class="info-btn">i
-                            <span class="tooltip">Quota trattenuta da Airbnb (di norma 15% o 15.5% per host che optano per il modello di commissione solo host). Non è deducibile nella Cedolare, né nel Forfettario.</span>
+                            <span class="tooltip">Quota trattenuta da Airbnb (di norma 15% o 15.5% per host che optano per il modello di commissione solo host). Non è deducibile nella Cedolare, né n[...]
                         </span>
                     </span>
                     <span class="slider-value" id="valCommissione">15,5%</span>
@@ -370,7 +377,7 @@
                     <span>
                         INPS Fissa Ridotta (-35%):
                         <span class="info-btn">i
-                            <span class="tooltip">Contributi minimi obbligatori della Gestione Commercianti con sconto del 35%. Con almeno 5 anni di contributi versati, avrai diritto alla pensione di vecchiaia.</span>
+                            <span class="tooltip">Contributi minimi obbligatori della Gestione Commercianti con sconto del 35%. Con almeno 5 anni di contributi versati, avrai diritto alla pensione di [...]
                         </span>
                     </span>
                     <strong>€ 3.000 / anno</strong>
@@ -405,7 +412,7 @@
                     <div class="box-title">
                         Forfettario (5%)
                         <span class="info-btn">i
-                            <span class="tooltip">Tassazione agevolata Startup (primi 5 anni). Viene tassato solo il 40% del fatturato lordo. L'aliquota effettiva sul totale è del solo 2% (5% del 40%).</span>
+                            <span class="tooltip">Tassazione agevolata Startup (primi 5 anni). Viene tassato solo il 40% del fatturato lordo. L'aliquota effettiva sul totale è del solo 2% (5% del 40%[...]
                         </span>
                     </div>
                     <div class="box-net" id="nettoForfettario">€ 0</div>
@@ -463,7 +470,7 @@
                             <span class="td-label">
                                 Imposte / Tasse
                                 <span class="info-btn">i
-                                    <span class="tooltip"><b>Cedolare:</b> 21% calcolato sul 100% del fatturato.<br><b>Forfettario:</b> 5% calcolato solo sul 40% del fatturato (pari ad appena il 2% effettivo).</span>
+                                    <span class="tooltip"><b>Cedolare:</b> 21% calcolato sul 100% del fatturato.<br><b>Forfettario:</b> 5% calcolato solo sul 40% del fatturato (pari ad appena il 2% ef[...]
                                 </span>
                             </span>
                         </td>
@@ -475,7 +482,7 @@
                             <span class="td-label">
                                 INPS Commercianti
                                 <span class="info-btn">i
-                                    <span class="tooltip">Spesa previdenziale obbligatoria. Nel Forfettario include il minimale fisso con sconto 35% (€3.000) più eventuale quota variabile (15.91% su eccedenza).</span>
+                                    <span class="tooltip">Spesa previdenziale obbligatoria. Nel Forfettario include il minimale fisso con sconto 35% (€3.000) più eventuale quota variabile (15.91% s[...]
                                 </span>
                             </span>
                         </td>
@@ -601,12 +608,37 @@
         const banner = document.getElementById('summaryBanner');
         if (nettoFor > nettoCed) {
             const scontoMax = ((nettoFor - nettoCed) / lordo) * 100;
-            banner.innerHTML = `Con il Forfettario guadagni <span class="highlight">${fmt(nettoFor - nettoCed)} in più</span> all'anno.<br>Puoi abbassare i prezzi fino al <span class="highlight">${scontoMax.toFixed(1)}%</span> e stare alla pari con la Cedolare.`;
+            banner.innerHTML = `Con il Forfettario guadagni <span class="highlight">${fmt(nettoFor - nettoCed)} in più</span> all'anno.<br>Puoi abbassare i prezzi fino al <span class="highlight">${scontoMax.toFixed(1)}%</span> e restare competitivo.`;
         } else {
             const diffNeg = nettoCed - nettoFor;
-            banner.innerHTML = `A questo livello di incasso la Cedolare ti conviene di <span class="highlight">${fmt(diffNeg)}</span>.<br>Aumenta lo slider del fatturato per vedere dove scatta il vantaggio del Forfettario.`;
+            banner.innerHTML = `A questo livello di incasso la Cedolare ti conviene di <span class="highlight">${fmt(diffNeg)}</span>.<br>Aumenta lo slider del fatturato per vedere dove scatta il vantaggio Forfettario.`;
         }
     }
+
+    // Touch support for info buttons - iOS Safari compatibility
+    document.addEventListener('DOMContentLoaded', function() {
+        const infoBtns = document.querySelectorAll('.info-btn');
+        
+        infoBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Remove active class from all buttons
+                infoBtns.forEach(b => b.classList.remove('active'));
+                
+                // Add active class to clicked button
+                this.classList.add('active');
+            });
+        });
+        
+        // Close tooltip when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.info-btn')) {
+                infoBtns.forEach(btn => btn.classList.remove('active'));
+            }
+        });
+    });
 
     // Inizializza al caricamento
     calcola();
