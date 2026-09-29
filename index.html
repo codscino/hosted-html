@@ -412,7 +412,7 @@
                     <div class="box-title">
                         Forfettario (5%)
                         <span class="info-btn">i
-                            <span class="tooltip">Tassazione agevolata Startup (primi 5 anni). Viene tassato solo il 40% del fatturato lordo. L'aliquota effettiva sul totale è del solo 2% (5% del 40%[...]
+                            <span class="tooltip">Tassazione agevolata Startup (primi 5 anni). Viene tassato solo il 50% del fatturato lordo (ATECO 68.20.01). L'aliquota effettiva sul totale è del solo 2.5% (5% del 50%[...]
                         </span>
                     </div>
                     <div class="box-net" id="nettoForfettario">€ 0</div>
@@ -470,7 +470,7 @@
                             <span class="td-label">
                                 Imposte / Tasse
                                 <span class="info-btn">i
-                                    <span class="tooltip"><b>Cedolare:</b> 21% calcolato sul 100% del fatturato.<br><b>Forfettario:</b> 5% calcolato solo sul 40% del fatturato (pari ad appena il 2% ef[...]
+                                    <span class="tooltip"><b>Cedolare:</b> 21% calcolato sul 100% del fatturato.<br><b>Forfettario:</b> 5% calcolato solo sul 50% del fatturato (ATECO 68.20.01, pari ad appena il 2.5% ef[...]
                                 </span>
                             </span>
                         </td>
@@ -555,8 +555,8 @@
         // 2. FORFETTARIO 5%
         const airbnbFor = lordo * commAirbnbPerc;
         const ivaFor = airbnbFor * IVA_RATE;
-        const imponibileFor = lordo * 0.40; // Codice ATECO 55.20.51 (Coefficiente 40%)
-        const tasseFor = imponibileFor * 0.05; // 5% startup sul 40% del lordo
+        const imponibileFor = lordo * 0.50; // ATECO 68.20.01 (Coefficiente 50%)
+        const tasseFor = imponibileFor * 0.05; // 5% startup sul 50% del lordo
         
         // Calcolo eventuale eccedenza INPS sopra il minimale (~18.808 €)
         let inpsVariabile = 0;
